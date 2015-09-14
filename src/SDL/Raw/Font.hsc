@@ -14,7 +14,7 @@ information about specific function behaviour, see the @SDL2_ttf@ documentation.
 {-# OPTIONS_GHC -fno-warn-missing-signatures #-}
 
 {-# LANGUAGE PatternSynonyms #-}
-{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE RankNTypes #-}
 
 module SDL.Raw.Font
   (
@@ -92,12 +92,12 @@ module SDL.Raw.Font
 
 #include "SDL_ttf.h"
 
+import Control.Monad.IO.Class
 import Foreign.C.String       (CString)
 import Foreign.C.Types        (CInt(..), CLong(..), CUShort(..))
 import Foreign.Ptr            (Ptr)
 import Prelude         hiding (init)
 import SDL.Raw.Types          (Version, Surface, RWops, Color)
-import SDL.Raw.Helper         (liftF)
 
 pattern UNICODE_BOM_NATIVE      = #{const UNICODE_BOM_NATIVE}
 pattern UNICODE_BOM_SWAPPED     = #{const UNICODE_BOM_SWAPPED}
@@ -111,17 +111,25 @@ pattern TTF_HINTING_MONO        = #{const TTF_HINTING_MONO}
 pattern TTF_HINTING_NONE        = #{const TTF_HINTING_NONE}
 pattern TTF_HINTING_NORMAL      = #{const TTF_HINTING_NORMAL}
 
-liftF "getVersion" "TTF_Linked_Version"
-  [t|IO (Ptr Version)|]
+foreign import ccall safe "static TTF_Linked_Version" getVersion' :: IO (Ptr Version)
+{-# INLINE getVersion #-}
+getVersion :: forall m_a5cM. MonadIO m_a5cM => m_a5cM (Ptr Version)
+getVersion = liftIO getVersion'
 
-liftF "init" "TTF_Init"
-  [t|IO CInt|]
+foreign import ccall safe "static TTF_Init" init' :: IO CInt
+{-# INLINE init #-}
+init :: forall m_a5dQ. MonadIO m_a5dQ => m_a5dQ CInt
+init = liftIO init'
 
-liftF "wasInit" "TTF_WasInit"
-  [t|IO CInt|]
+foreign import ccall safe "static TTF_WasInit" wasInit' :: IO CInt
+{-# INLINE wasInit #-}
+wasInit :: forall m_a5pE. MonadIO m_a5pE => m_a5pE CInt
+wasInit = liftIO wasInit'
 
-liftF "quit" "TTF_Quit"
-  [t|IO ()|]
+foreign import ccall safe "static TTF_Quit" quit' :: IO ()
+{-# INLINE quit #-}
+quit :: forall m_a5qh. MonadIO m_a5qh => m_a5qh ()
+quit = liftIO quit'
 
 -- | A path to a font file.
 type FontPath = CString
@@ -138,121 +146,158 @@ type Free = CInt
 -- | Indicates the font face we're loading. First face is always 0.
 type Index = CLong
 
-liftF "openFont" "TTF_OpenFont"
-  [t|FontPath -> PointSize -> IO (Ptr Font)|]
+foreign import ccall safe "static TTF_OpenFont" openFont' :: FontPath -> PointSize -> IO (Ptr Font)
+{-# INLINE openFont #-}
+openFont x_a5rh x_a5ri = liftIO (openFont' x_a5rh x_a5ri)
 
-liftF "openFont_RW" "TTF_OpenFontRW"
-  [t|Ptr RWops -> Free -> PointSize -> IO (Ptr Font)|]
+foreign import ccall safe "static TTF_OpenFontRW" openFont_RW' :: Ptr RWops -> Free -> PointSize -> IO (Ptr Font)
+{-# INLINE openFont_RW #-}
+openFont_RW x_a5sC x_a5sD x_a5sE = liftIO (openFont_RW' x_a5sC x_a5sD x_a5sE)
 
-liftF "openFontIndex" "TTF_OpenFontIndex"
-  [t|FontPath -> PointSize -> Index -> IO (Ptr Font)|]
+foreign import ccall safe "static TTF_OpenFontIndex" openFontIndex' :: FontPath -> PointSize -> Index -> IO (Ptr Font)
+{-# INLINE openFontIndex #-}
+openFontIndex x_a5tQ x_a5tR x_a5tS = liftIO (openFontIndex' x_a5tQ x_a5tR x_a5tS)
 
-liftF "openFontIndex_RW" "TTF_OpenFontIndexRW"
-  [t|Ptr RWops -> Free -> PointSize -> Index -> IO (Ptr Font)|]
+foreign import ccall safe "static TTF_OpenFontIndexRW" openFontIndex_RW' :: Ptr RWops -> Free -> PointSize -> Index -> IO (Ptr Font)
+{-# INLINE openFontIndex_RW #-}
+openFontIndex_RW x_a5vg x_a5vh x_a5vi x_a5vj = liftIO (openFontIndex_RW' x_a5vg x_a5vh x_a5vi x_a5vj)
 
-liftF "closeFont" "TTF_CloseFont"
-  [t|Ptr Font -> IO ()|]
+foreign import ccall safe "static TTF_CloseFont" closeFont' :: Ptr Font -> IO ()
+{-# INLINE closeFont #-}
+closeFont x_a5wf = liftIO (closeFont' x_a5wf)
 
-liftF "byteSwappedUNICODE" "TTF_ByteSwappedUNICODE"
-  [t|CInt -> IO ()|]
+foreign import ccall safe "static TTF_ByteSwappedUNICODE" byteSwappedUNICODE' :: CInt -> IO ()
+{-# INLINE byteSwappedUNICODE #-}
+byteSwappedUNICODE x_a5x1 = liftIO (byteSwappedUNICODE' x_a5x1)
 
-liftF "getFontStyle" "TTF_GetFontStyle"
-  [t|Ptr Font -> IO CInt|]
+foreign import ccall safe "static TTF_GetFontStyle" getFontStyle' :: Ptr Font -> IO CInt
+{-# INLINE getFontStyle #-}
+getFontStyle x_a5xV = liftIO (getFontStyle' x_a5xV)
 
-liftF "setFontStyle" "TTF_SetFontStyle"
-  [t|Ptr Font -> CInt -> IO ()|]
+foreign import ccall safe "static TTF_SetFontStyle" setFontStyle' :: Ptr Font -> CInt -> IO ()
+{-# INLINE setFontStyle #-}
+setFontStyle x_a5yU x_a5yV = liftIO (setFontStyle' x_a5yU x_a5yV)
 
-liftF "getFontOutline" "TTF_GetFontOutline"
-  [t|Ptr Font -> IO CInt|]
+foreign import ccall safe "static TTF_GetFontOutline" getFontOutline' :: Ptr Font -> IO CInt
+{-# INLINE getFontOutline #-}
+getFontOutline x_a5zR = liftIO (getFontOutline' x_a5zR)
 
-liftF "setFontOutline" "TTF_SetFontOutline"
-  [t|Ptr Font -> CInt -> IO ()|]
+foreign import ccall safe "static TTF_SetFontOutline" setFontOutline' :: Ptr Font -> CInt -> IO ()
+{-# INLINE setFontOutline #-}
+setFontOutline x_a5AQ x_a5AR = liftIO (setFontOutline' x_a5AQ x_a5AR)
 
-liftF "getFontHinting" "TTF_GetFontHinting"
-  [t|Ptr Font -> IO CInt|]
+foreign import ccall safe "static TTF_GetFontHinting" getFontHinting' :: Ptr Font -> IO CInt
+{-# INLINE getFontHinting #-}
+getFontHinting x_a5BN = liftIO (getFontHinting' x_a5BN)
 
-liftF "setFontHinting" "TTF_SetFontHinting"
-  [t|Ptr Font -> CInt -> IO ()|]
+foreign import ccall safe "static TTF_SetFontHinting" setFontHinting' :: Ptr Font -> CInt -> IO ()
+{-# INLINE setFontHinting #-}
+setFontHinting x_a5CM x_a5CN = liftIO (setFontHinting' x_a5CM x_a5CN)
 
-liftF "getFontKerning" "TTF_GetFontKerning"
-  [t|Ptr Font -> IO CInt|]
+foreign import ccall safe "static TTF_GetFontKerning" getFontKerning' :: Ptr Font -> IO CInt
+{-# INLINE getFontKerning #-}
+getFontKerning x_a5DJ = liftIO (getFontKerning' x_a5DJ)
 
-liftF "setFontKerning" "TTF_SetFontKerning"
-  [t|Ptr Font -> CInt -> IO ()|]
+foreign import ccall safe "static TTF_SetFontKerning" setFontKerning' :: Ptr Font -> CInt -> IO ()
+{-# INLINE setFontKerning #-}
+setFontKerning x_a5EI x_a5EJ = liftIO (setFontKerning' x_a5EI x_a5EJ)
 
-liftF "fontHeight" "TTF_FontHeight"
-  [t|Ptr Font -> IO CInt|]
+foreign import ccall safe "static TTF_FontHeight" fontHeight' :: Ptr Font -> IO CInt
+{-# INLINE fontHeight #-}
+fontHeight x_a5FF = liftIO (fontHeight' x_a5FF)
 
-liftF "fontAscent" "TTF_FontAscent"
-  [t|Ptr Font -> IO CInt|]
+foreign import ccall safe "static TTF_FontAscent" fontAscent' :: Ptr Font -> IO CInt
+{-# INLINE fontAscent #-}
+fontAscent x_a5GA = liftIO (fontAscent' x_a5GA)
 
-liftF "fontDescent" "TTF_FontDescent"
-  [t|Ptr Font -> IO CInt|]
+foreign import ccall safe "static TTF_FontDescent" fontDescent' :: Ptr Font -> IO CInt
+{-# INLINE fontDescent #-}
+fontDescent x_a5Hv = liftIO (fontDescent' x_a5Hv)
 
-liftF "fontLineSkip" "TTF_FontLineSkip"
-  [t|Ptr Font -> IO CInt|]
+foreign import ccall safe "static TTF_FontLineSkip" fontLineSkip' :: Ptr Font -> IO CInt
+{-# INLINE fontLineSkip #-}
+fontLineSkip x_a5Iq = liftIO (fontLineSkip' x_a5Iq)
 
-liftF "fontFaces" "TTF_FontFaces"
-  [t|Ptr Font -> IO CLong|]
+foreign import ccall safe "static TTF_FontFaces" fontFaces' :: Ptr Font -> IO CLong
+{-# INLINE fontFaces #-}
+fontFaces x_a5Jl = liftIO (fontFaces' x_a5Jl)
 
-liftF "fontFaceIsFixedWidth" "TTF_FontFaceIsFixedWidth"
-  [t|Ptr Font -> IO CInt|]
+foreign import ccall safe "static TTF_FontFaceIsFixedWidth" fontFaceIsFixedWidth' :: Ptr Font -> IO CInt
+{-# INLINE fontFaceIsFixedWidth #-}
+fontFaceIsFixedWidth x_a5Kg = liftIO (fontFaceIsFixedWidth' x_a5Kg)
 
-liftF "fontFaceFamilyName" "TTF_FontFaceFamilyName"
-  [t|Ptr Font -> IO CString|]
+foreign import ccall safe "static TTF_FontFaceFamilyName" fontFaceFamilyName' :: Ptr Font -> IO CString
+{-# INLINE fontFaceFamilyName #-}
+fontFaceFamilyName x_a5Lb = liftIO (fontFaceFamilyName' x_a5Lb)
 
-liftF "fontFaceStyleName"  "TTF_FontFaceStyleName"
-  [t|Ptr Font -> IO CString|]
+foreign import ccall safe "static TTF_FontFaceStyleName" fontFaceStyleName' :: Ptr Font -> IO CString
+{-# INLINE fontFaceStyleName #-}
+fontFaceStyleName x_a5M6 = liftIO (fontFaceStyleName' x_a5M6)
 
-liftF "glyphIsProvided" "TTF_GlyphIsProvided"
-  [t|Ptr Font -> CUShort -> IO CInt|]
+foreign import ccall safe "static TTF_GlyphIsProvided" glyphIsProvided' :: Ptr Font -> CUShort -> IO CInt
+{-# INLINE glyphIsProvided #-}
+glyphIsProvided x_a5N8 x_a5N9 = liftIO (glyphIsProvided' x_a5N8 x_a5N9)
 
-liftF "glyphMetrics" "TTF_GlyphMetrics"
-  [t|Ptr Font -> CUShort ->
-     Ptr CInt -> Ptr CInt -> Ptr CInt -> Ptr CInt -> Ptr CInt ->
-     IO CInt|]
+foreign import ccall safe "static TTF_GlyphMetrics" glyphMetrics' :: Ptr Font -> CUShort -> Ptr CInt -> Ptr CInt -> Ptr CInt -> Ptr CInt -> Ptr CInt -> IO CInt
+{-# INLINE glyphMetrics #-}
+glyphMetrics x_a5Zw x_a5Zx x_a5Zy x_a5Zz x_a5ZA x_a5ZB x_a5ZC = liftIO (glyphMetrics' x_a5Zw x_a5Zx x_a5Zy x_a5Zz x_a5ZA x_a5ZB x_a5ZC)
 
-liftF "sizeText" "TTF_SizeText"
-  [t|Ptr Font -> CString -> Ptr CInt -> Ptr CInt -> IO CInt|]
+foreign import ccall safe "static TTF_SizeText" sizeText' :: Ptr Font -> CString -> Ptr CInt -> Ptr CInt -> IO CInt
+{-# INLINE sizeText #-}
+sizeText x_a61f x_a61g x_a61h x_a61i = liftIO (sizeText' x_a61f x_a61g x_a61h x_a61i)
 
-liftF "sizeUTF8" "TTF_SizeUTF8"
-  [t|Ptr Font -> CString -> Ptr CInt -> Ptr CInt -> IO CInt|]
+foreign import ccall safe "static TTF_SizeUTF8" sizeUTF8' :: Ptr Font -> CString -> Ptr CInt -> Ptr CInt -> IO CInt
+{-# INLINE sizeUTF8 #-}
+sizeUTF8 x_a62P x_a62Q x_a62R x_a62S = liftIO (sizeUTF8' x_a62P x_a62Q x_a62R x_a62S)
 
-liftF "sizeUNICODE" "TTF_SizeUNICODE"
-  [t|Ptr Font -> Ptr CUShort -> Ptr CInt -> Ptr CInt -> IO CInt|]
+foreign import ccall safe "static TTF_SizeUNICODE" sizeUNICODE' :: Ptr Font -> Ptr CUShort -> Ptr CInt -> Ptr CInt -> IO CInt
+{-# INLINE sizeUNICODE #-}
+sizeUNICODE x_a64v x_a64w x_a64x x_a64y = liftIO (sizeUNICODE' x_a64v x_a64w x_a64x x_a64y)
 
-liftF "renderText_Solid" "TTF_RenderText_Solid_p"
-  [t|Ptr Font -> CString -> Ptr Color -> IO (Ptr Surface)|]
+foreign import ccall safe "static TTF_RenderText_Solid_p" renderText_Solid' :: Ptr Font -> CString -> Ptr Color -> IO (Ptr Surface)
+{-# INLINE renderText_Solid #-}
+renderText_Solid x_a65Z x_a660 x_a661 = liftIO (renderText_Solid' x_a65Z x_a660 x_a661)
 
-liftF "renderUTF8_Solid" "TTF_RenderUTF8_Solid_p"
-  [t|Ptr Font -> CString -> Ptr Color -> IO (Ptr Surface)|]
+foreign import ccall safe "static TTF_RenderUTF8_Solid_p" renderUTF8_Solid' :: Ptr Font -> CString -> Ptr Color -> IO (Ptr Surface)
+{-# INLINE renderUTF8_Solid #-}
+renderUTF8_Solid x_a67q x_a67r x_a67s = liftIO (renderUTF8_Solid' x_a67q x_a67r x_a67s)
 
-liftF "renderUNICODE_Solid" "TTF_RenderUNICODE_Solid_p"
-  [t|Ptr Font -> Ptr CUShort -> Ptr Color -> IO (Ptr Surface)|]
+foreign import ccall safe "static TTF_RenderUNICODE_Solid_p" renderUNICODE_Solid' :: Ptr Font -> Ptr CUShort -> Ptr Color -> IO (Ptr Surface)
+{-# INLINE renderUNICODE_Solid #-}
+renderUNICODE_Solid x_a68X x_a68Y x_a68Z = liftIO (renderUNICODE_Solid' x_a68X x_a68Y x_a68Z)
 
-liftF "renderGlyph_Solid" "TTF_RenderGlyph_Solid_p"
-  [t|Ptr Font -> CUShort -> Ptr Color -> IO (Ptr Surface)|]
+foreign import ccall safe "static TTF_RenderGlyph_Solid_p" renderGlyph_Solid' :: Ptr Font -> CUShort -> Ptr Color -> IO (Ptr Surface)
+{-# INLINE renderGlyph_Solid #-}
+renderGlyph_Solid x_a6ap x_a6aq x_a6ar = liftIO (renderGlyph_Solid' x_a6ap x_a6aq x_a6ar)
 
-liftF "renderText_Shaded" "TTF_RenderText_Shaded_p"
-  [t|Ptr Font -> CString -> Ptr Color -> Ptr Color -> IO (Ptr Surface)|]
+foreign import ccall safe "static TTF_RenderText_Shaded_p" renderText_Shaded' :: Ptr Font -> CString -> Ptr Color -> Ptr Color -> IO (Ptr Surface)
+{-# INLINE renderText_Shaded #-}
+renderText_Shaded x_a6c3 x_a6c4 x_a6c5 x_a6c6 = liftIO (renderText_Shaded' x_a6c3 x_a6c4 x_a6c5 x_a6c6)
 
-liftF "renderUTF8_Shaded" "TTF_RenderUTF8_Shaded_p"
-  [t|Ptr Font -> CString -> Ptr Color -> Ptr Color -> IO (Ptr Surface)|]
+foreign import ccall safe "static TTF_RenderUTF8_Shaded_p" renderUTF8_Shaded' :: Ptr Font -> CString -> Ptr Color -> Ptr Color -> IO (Ptr Surface)
+{-# INLINE renderUTF8_Shaded #-}
+renderUTF8_Shaded x_a6dK x_a6dL x_a6dM x_a6dN = liftIO (renderUTF8_Shaded' x_a6dK x_a6dL x_a6dM x_a6dN)
 
-liftF "renderUNICODE_Shaded" "TTF_RenderUNICODE_Shaded_p"
-  [t|Ptr Font -> Ptr CUShort -> Ptr Color -> Ptr Color -> IO (Ptr Surface)|]
+foreign import ccall safe "static TTF_RenderUNICODE_Shaded_p" renderUNICODE_Shaded' :: Ptr Font -> Ptr CUShort -> Ptr Color -> Ptr Color -> IO (Ptr Surface)
+{-# INLINE renderUNICODE_Shaded #-}
+renderUNICODE_Shaded x_a6fx x_a6fy x_a6fz x_a6fA = liftIO (renderUNICODE_Shaded' x_a6fx x_a6fy x_a6fz x_a6fA)
 
-liftF "renderGlyph_Shaded" "TTF_RenderGlyph_Shaded_p"
-  [t|Ptr Font -> CUShort -> Ptr Color -> Ptr Color -> IO (Ptr Surface)|]
+foreign import ccall safe "static TTF_RenderGlyph_Shaded_p" renderGlyph_Shaded' :: Ptr Font -> CUShort -> Ptr Color -> Ptr Color -> IO (Ptr Surface)
+{-# INLINE renderGlyph_Shaded #-}
+renderGlyph_Shaded x_a6hf x_a6hg x_a6hh x_a6hi = liftIO (renderGlyph_Shaded' x_a6hf x_a6hg x_a6hh x_a6hi)
 
-liftF "renderText_Blended" "TTF_RenderText_Blended_p"
-  [t|Ptr Font -> CString -> Ptr Color -> IO (Ptr Surface)|]
+foreign import ccall safe "static TTF_RenderText_Blended_p" renderText_Blended' :: Ptr Font -> CString -> Ptr Color -> IO (Ptr Surface)
+{-# INLINE renderText_Blended #-}
+renderText_Blended x_a6iJ x_a6iK x_a6iL = liftIO (renderText_Blended' x_a6iJ x_a6iK x_a6iL)
 
-liftF "renderUTF8_Blended" "TTF_RenderUTF8_Blended_p"
-  [t|Ptr Font -> CString -> Ptr Color -> IO (Ptr Surface)|]
+foreign import ccall safe "static TTF_RenderUTF8_Blended_p" renderUTF8_Blended' :: Ptr Font -> CString -> Ptr Color -> IO (Ptr Surface)
+{-# INLINE renderUTF8_Blended #-}
+renderUTF8_Blended x_a6ka x_a6kb x_a6kc = liftIO (renderUTF8_Blended' x_a6ka x_a6kb x_a6kc)
 
-liftF "renderUNICODE_Blended" "TTF_RenderUNICODE_Blended_p"
-  [t|Ptr Font -> Ptr CUShort -> Ptr Color -> IO (Ptr Surface)|]
+foreign import ccall safe "static TTF_RenderUNICODE_Blended_p" renderUNICODE_Blended' :: Ptr Font -> Ptr CUShort -> Ptr Color -> IO (Ptr Surface)
+{-# INLINE renderUNICODE_Blended #-}
+renderUNICODE_Blended x_a6lH x_a6lI x_a6lJ = liftIO (renderUNICODE_Blended' x_a6lH x_a6lI x_a6lJ)
 
-liftF "renderGlyph_Blended" "TTF_RenderGlyph_Blended_p"
-  [t|Ptr Font -> CUShort -> Ptr Color -> IO (Ptr Surface)|]
+foreign import ccall safe "static TTF_RenderGlyph_Blended_p" renderGlyph_Blended' :: Ptr Font -> CUShort -> Ptr Color -> IO (Ptr Surface)
+{-# INLINE renderGlyph_Blended #-}
+renderGlyph_Blended x_a6n9 x_a6na x_a6nb = liftIO (renderGlyph_Blended' x_a6n9 x_a6na x_a6nb)
